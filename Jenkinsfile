@@ -5,7 +5,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t naveenprasaath2904/web-app:jen1 .'
+                bat 'docker build -t naveenprasaath2904/web-app:jen1 .'
             }
         }
 
@@ -16,12 +16,24 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push naveenprasaath2904/web-app:jen1
+
+                    bat '''
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                    docker push naveenprasaath2904/web-app:jen1
+                    docker logout
                     '''
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker image built and pushed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
