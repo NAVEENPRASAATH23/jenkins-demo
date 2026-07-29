@@ -1,32 +1,27 @@
 pipeline {
-
     agent any
 
     stages {
 
-        stage('Welcome') {
+        stage('Build Docker Image') {
             steps {
-                echo "Welcome to Jenkins"
+                sh 'docker build -t naveenprasaath2904/web-app:jen1 .'
             }
         }
 
-        stage('Build') {
+        stage('Push Docker Image') {
             steps {
-                echo "Building Application..."
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push naveenprasaath2904/web-app:jen1
+                    '''
+                }
             }
         }
-
-        stage('Test') {
-            steps {
-                echo "Running Unit Tests..."
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo "Deploying Application..."
-            }
-        }
-
     }
 }
